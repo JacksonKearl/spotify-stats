@@ -16,7 +16,7 @@ export const sendEmail = async (options: {
           },
         ],
         from: {
-          email: "noreply@spotify-stats.pages.dev",
+          email: "noreply@spotifystats.pages.dev",
           name: "SpotifyStats",
         },
         subject: options.subject,
@@ -38,7 +38,7 @@ export const onRequestPost: PagesFunction = async ({ env, request }) => {
   await sendEmail({
     to: email,
     subject: "Click Here when Spotify gives you your data",
-    body: "You got your spotify data? And not just the Account data, but the Extended Playback History? Great. Download it, unzip it, then go to https://spotify-stats.pages.dev and select the file.\n\nNote: by default all data stays local to your browser, if you do choose to upload the data for sharing, all personal information will be stripped before upload.",
+    body: "You got your spotify data? And not just the Account data, but the Extended Playback History? Great. Download it, unzip it, then go to https://spotifystats.pages.dev and select the file.\n\nNote: by default all data stays local to your browser, if you do choose to upload the data for sharing, all personal information will be stripped before upload.",
   })
   return new Response("k")
 }
