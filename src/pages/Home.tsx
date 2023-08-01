@@ -6,9 +6,16 @@ const dayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "long" })
 const yearFormatter = new Intl.DateTimeFormat(undefined, { year: "numeric" })
 const monthFormatter = new Intl.DateTimeFormat(undefined, { month: "long" })
 const hourFormatter = new Intl.DateTimeFormat(undefined, { hour: "numeric" })
-const periodFormatter = new Intl.DateTimeFormat(undefined, {
-  dayPeriod: "long",
-})
+const periodFormatter = (date: Date) => {
+  const h = date.getHours()
+  if (h >= 6 && h <= 13) {
+    return ["early", 0]
+  }
+  if (h >= 13 && h <= 21) {
+    return ["late", 1]
+  }
+  return ["night", 2]
+}
 
 const useQueryState = <T extends string>(
   name: string,
@@ -98,7 +105,8 @@ const App: FunctionComponent<{
   primary: Field
   breakout: Field
   data: SpotifyClean[]
-}> = ({ breakout, primary, data: rawData }) => {
+  minPlay: number
+}> = ({ breakout, primary, data: rawData, minPlay }) => {
   const record: Record<string, ItemData> = {}
   const primarySortKey: Record<string, number> = {}
   const totalSortKey: Record<string, number> = {}
@@ -130,7 +138,7 @@ const App: FunctionComponent<{
       month: monthFormatter.format(playDate),
       day: dayFormatter.format(playDate),
       hour: hourFormatter.format(playDate),
-      period: periodFormatter.format(playDate),
+      period: periodFormatter(playDate)[0],
     }
 
     const dates = {
@@ -138,7 +146,7 @@ const App: FunctionComponent<{
       month: playDate.getMonth(),
       day: playDate.getDay(),
       hour: playDate.getHours(),
-      period: periodFormatter.format(playDate),
+      period: periodFormatter(playDate)[1],
     }
 
     const key = "" + { ...datum, ...dates }[primary]
@@ -165,7 +173,7 @@ const App: FunctionComponent<{
   }
 
   const sorted = Object.entries(record)
-    // .filter(([, d]) => d.playTime > 0.01)
+    .filter(([, d]) => d.playTime > minPlay)
     .sort(([, a], [, b]) => primarySortKey[b.key] - primarySortKey[a.key])
 
   const secondaryLabels = new Set<string>()
@@ -182,7 +190,9 @@ const App: FunctionComponent<{
   labels.forEach((l, i) => (indexLookup[l] = i))
 
   const labelQuantifier = (v: number) =>
-    `${Math.round(v * 100) / 100} Hours Played`
+    v > 1.5
+      ? `${Math.round(v * 100) / 100} Hours Played`
+      : `${Math.round(v * 60)} Minutes Played`
 
   const plotlyData = sorted
     .map(([id, data]) => ({
@@ -280,6 +290,7 @@ export function Home() {
 
   const [primary, setPrimary] = useQueryState<Field>("main", "artist")
   const [breakout, setBreakout] = useQueryState<Field>("break", "album")
+  const [minPlay, setMinPlay] = useQueryState<string>("mindur", "1")
 
   const makeSelector = (v: string, sV: (v: Field) => void) => (
     <select value={v} onChange={(e) => sV(e.currentTarget.value as Field)}>
@@ -300,7 +311,7 @@ export function Home() {
 
   const musicVSPodcast = (
     <div style="display: flex; gap: 5px">
-      Showing:
+      Showing
       <label>
         <input
           type="radio"
@@ -328,6 +339,16 @@ export function Home() {
         ></input>
         Both
       </label>
+      <label style="display: content">
+        played for over
+        <input
+          style="width: 30px; margin: 0 2px"
+          type="number"
+          value={minPlay}
+          onChange={(e) => setMinPlay(e.currentTarget.value)}
+        ></input>
+        minute{minPlay === "1" ? "" : "s"}.
+      </label>
     </div>
   )
 
@@ -337,6 +358,8 @@ export function Home() {
 
   const [windowStart, setWindowStart] = useQueryState<string>("start", "0")
   const [windowWidth, setWindowWidth] = useQueryState<string>("width", "1")
+
+  const durationInput = <></>
 
   const firstAsUNIXTime = +new Date(firstData.play_date)
   const lastAsUNIXTime = +new Date(lastData.play_date)
@@ -383,16 +406,10 @@ export function Home() {
     .filter((v) => {
       if (musicPodFilter === "pod" && !v.is_podcast) return false
       if (musicPodFilter === "music" && v.is_podcast) return false
-      const unixTime = +new Date(v.play_date)
-      if (unixTime > startAsUNIXTime && unixTime < endAsUNIXTime) return true
-      return false
-      const dist =
-        Math.min(
-          Math.abs(startAsUNIXTime - unixTime),
-          Math.abs(endAsUNIXTime - unixTime),
-        ) / widthAsUNIXTime
 
-      v.duration_played *= Math.exp(-dist * 5)
+      const unixTime = +new Date(v.play_date)
+      if (unixTime < startAsUNIXTime || unixTime > endAsUNIXTime) return false
+
       return true
     })
 
@@ -477,10 +494,17 @@ export function Home() {
         <div>
           <a href="/howto">How Do I Request My Data from Spotify?</a>
         </div>
-        <div>{musicVSPodcast}</div>
+        <div>
+          {musicVSPodcast} {durationInput}
+        </div>
         <div>{ranges}</div>
       </p>
-      <App primary={primary} breakout={breakout} data={filteredData}></App>
+      <App
+        primary={primary}
+        breakout={breakout}
+        data={filteredData}
+        minPlay={+minPlay / 60}
+      ></App>
       <p style={"padding: 5px"}>
         This uses <a href="https://plotly.com/javascript/">plotly.js</a>, and{" "}
         <a href="https://preactjs.com/">preact</a>!{" "}
