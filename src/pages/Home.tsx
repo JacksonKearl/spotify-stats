@@ -131,6 +131,7 @@ const App: FunctionComponent<{
     datum.artist = datum.artist.replace(/Kanye West/, "Ye")
     datum.album = datum.album.replace(/\s*\(.*\)/, "")
     datum.album = datum.album.replace(/\s*\[.*\]/, "")
+    datum.album = datum.album.replace(/:.*Box Set/, "")
 
     const playDate = new Date(datum.play_date)
     const labels = {
