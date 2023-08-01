@@ -1,0 +1,31 @@
+```ts
+import { readFileSync, writeFileSync } from "fs"
+
+const data = JSON.parse(readFileSync("./spotify_raw.json", "utf-8"))
+
+const clean: {
+  name: string
+  artist: string
+  album: string
+  play_date: Date
+  duration_played: string
+  is_podcast: boolean
+}[] = []
+for (const play of data) {
+  if (play.ms_played > 0) {
+    clean.push({
+      name: play.master_metadata_track_name ?? play.episode_name,
+      duration_played: play.ms_played,
+      artist: play.master_metadata_album_artist_name ?? play.episode_show_name,
+      album: play.master_metadata_album_album_name ?? play.episode_show_name,
+      play_date: new Date(play.ts),
+      is_podcast: Boolean(!play.master_metadata_track_name),
+    })
+  }
+}
+
+console.log(clean.slice(0, 10))
+
+writeFileSync("./spotify_clean.json", JSON.stringify(clean, null, 2), "utf-8")
+
+```
