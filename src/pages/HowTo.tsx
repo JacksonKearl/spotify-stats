@@ -19,7 +19,10 @@ export const HowTo: FunctionComponent = () => {
         </a>{" "}
         page, then scroll all the way to the bottom and select the "Extended
         streaming history" checkbox. Click "Request Data", then sit back and
-        wait for about a week for the data to come.
+        wait for about a week for the data to come. You should maybe bookmark
+        this page so you can find it in a week. You can try sending yourself an
+        email below but the Cloudflare mailchannels API it uses isn't really
+        working.
       </p>
 
       <form
@@ -54,7 +57,7 @@ export const HowTo: FunctionComponent = () => {
         Once you get the "Your extended streaming history is ready to download"
         email, clicking the "DOWNLOAD" link should take you to a Spotify page
         where the download automatically starts. Once complete, unzip the file,
-        locate the "Streaming_History_Audio_{"{"}...-2023{"}"}.json" document,
+        locate the "Streaming_History_Audio_{"{"}...{"}"}-2023.json" document,
         and select it from the file picker on the home page. (You can select
         multiple files if needed.)
       </p>

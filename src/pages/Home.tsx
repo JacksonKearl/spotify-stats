@@ -300,7 +300,7 @@ export function Home() {
 
   const musicVSPodcast = (
     <div style="display: flex; gap: 5px">
-      Showing: 
+      Showing:
       <label>
         <input
           type="radio"
@@ -487,6 +487,8 @@ export function Home() {
         <a href="https://github.com/JacksonKearl/spotify-stats">View Source</a>
         {" | "}
         <a href="/privacy">Privacy Policy</a>
+        {" | "}
+        <a href="https://apple-music-stats.pages.dev">Apple Music Version</a>
       </p>
     </>
   )
