@@ -1,4 +1,10 @@
-import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks"
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "preact/hooks"
 import { FunctionComponent } from "preact"
 import Plot from "react-plotly.js"
 
@@ -292,6 +298,18 @@ export function Home() {
   const [primary, setPrimary] = useQueryState<Field>("main", "artist")
   const [breakout, setBreakout] = useQueryState<Field>("break", "album")
   const [minPlay, setMinPlay] = useQueryState<string>("mindur", "1")
+  const [windowStart, setWindowStart] = useQueryState<string>("start", "0")
+  const [windowWidth, setWindowWidth] = useQueryState<string>("width", "1")
+  const [musicPodFilter, setMusicPodFilter] = useQueryState<
+    "both" | "music" | "pod"
+  >("pod", "both")
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetch("/analytics" + new URL(window.location.href).search)
+    }, 1000)
+    return () => clearTimeout(t)
+  }, [primary, breakout, minPlay, windowStart, windowWidth, musicPodFilter])
 
   const makeSelector = (v: string, sV: (v: Field) => void) => (
     <select value={v} onChange={(e) => sV(e.currentTarget.value as Field)}>
@@ -305,10 +323,6 @@ export function Home() {
       <option value="period">Period</option>
     </select>
   )
-
-  const [musicPodFilter, setMusicPodFilter] = useQueryState<
-    "both" | "music" | "pod"
-  >("pod", "both")
 
   const musicVSPodcast = (
     <div style="display: flex; gap: 5px">
@@ -356,9 +370,6 @@ export function Home() {
   data.sort((a, b) => +new Date(a.play_date) - +new Date(b.play_date))
   const firstData = data[0]
   const lastData = data[data.length - 1]
-
-  const [windowStart, setWindowStart] = useQueryState<string>("start", "0")
-  const [windowWidth, setWindowWidth] = useQueryState<string>("width", "1")
 
   const durationInput = <></>
 

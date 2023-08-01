@@ -13,7 +13,11 @@ export const Privacy: FunctionComponent = () => {
         <a href="https://www.cloudflare.com/web-analytics/">
           Cloudflare Web Analytics
         </a>{" "}
-        for privacy-perserving analytics.
+        and{" "}
+        <a href="https://developers.cloudflare.com/analytics/analytics-engine/">
+          Cloudflare Workers Analytics Engine
+        </a>
+        for privacy-preserving analytics.
       </p>
       <p>
         No personal data is collected unless you choose to upload your data as
@@ -21,9 +25,13 @@ export const Privacy: FunctionComponent = () => {
         it is stored indefinitely in{" "}
         <a href="https://www.cloudflare.com/products/workers-kv/">
           Cloudflare KV
-        </a>.
+        </a>
+        .
       </p>
-      <p>Uploaded data may be used and/or published for future feature development.</p>
+      <p>
+        Uploaded data may be used and/or published for future feature
+        development.
+      </p>
       <a href="/">Home</a>
       <p>
         Reach out on{" "}
