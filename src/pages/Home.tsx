@@ -7,6 +7,8 @@ import {
 } from "preact/hooks"
 import { FunctionComponent } from "preact"
 import Plot from "react-plotly.js"
+import spotifyData from "../assets/spotify_clean.json"
+import { synesthesia } from "./HashFinder"
 
 const dayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "long" })
 const yearFormatter = new Intl.DateTimeFormat(undefined, { year: "numeric" })
@@ -45,9 +47,6 @@ const useQueryState = <T extends string>(
 
   return [internal, setAll]
 }
-
-import spotifyData from "../assets/spotify_clean.json"
-import { synesthesia } from "./HashFinder"
 
 type SpotifyRaw = {
   ts: string
@@ -248,7 +247,7 @@ const App: FunctionComponent<{
   // some bignum bullshit
   const UntypedPlot = Plot as any
   return (
-    <div ref={r} style={`flex-grow: 1; min-height: ${labels.length * 20}px`}>
+    <div ref={r} style={`flex-grow: 1; min-height: ${labels.length * 100}px`}>
       <UntypedPlot
         data={plotlyData}
         layout={layout}
