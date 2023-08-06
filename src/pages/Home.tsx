@@ -47,6 +47,7 @@ const useQueryState = <T extends string>(
 }
 
 import spotifyData from "../assets/spotify_clean.json"
+import { synesthesia } from "./HashFinder"
 
 type SpotifyRaw = {
   ts: string
@@ -75,28 +76,6 @@ type ItemData = {
   secondary: string
 }
 
-const stringToColor = (str: string) => {
-  let hashCode = 0xdeadbeef
-  for (let i = 0; i < str.length; i++) {
-    hashCode = str.charCodeAt(i) + ((hashCode << 5) - hashCode)
-  }
-  for (let i = 0; i < str.length; i++) {
-    hashCode = str.charCodeAt(i) + ((hashCode << 5) - hashCode)
-  }
-  for (let i = 0; i < str.length; i++) {
-    hashCode = str.charCodeAt(i) + ((hashCode << 5) - hashCode)
-  }
-  for (let i = 0; i < str.length; i++) {
-    hashCode = str.charCodeAt(i) + ((hashCode << 5) - hashCode)
-  }
-
-  const r = (hashCode & 0xff0000) >> 16
-  const g = (hashCode & 0x00ff00) >> 8
-  const b = hashCode & 0x0000ff
-
-  return `rgb(${r}, ${g}, ${b})`
-}
-
 type Field =
   | "name"
   | "artist"
@@ -110,6 +89,7 @@ type Field =
 const App: FunctionComponent<{
   primary: Field
   breakout: Field
+  width: number
   data: SpotifyClean[]
   minPlay: number
 }> = ({ breakout, primary, data: rawData, minPlay }) => {
@@ -211,7 +191,7 @@ const App: FunctionComponent<{
         y: [data.key],
         text: data.secondary,
         textposition: "inside",
-        marker: { color: [stringToColor(data.secondary)] },
+        marker: { color: [synesthesia("37mw5", data.secondary)] },
         orientation: "h",
         hovertext: `${data.secondary} | ${
           labelFinder[data.key] ?? data.key
@@ -222,7 +202,7 @@ const App: FunctionComponent<{
     .sort(({ secondaryOrder: a }, { secondaryOrder: b }) => b - a)
     .sort(({ primaryOrder: a }, { primaryOrder: b }) => b - a)
     .map(({ data }) => data)
-  const maxLabelLength = 18
+  const maxLabelLength = 20
 
   console.log({
     totalSortKey,
@@ -311,6 +291,14 @@ export function Home() {
     return () => clearTimeout(t)
   }, [primary, breakout, minPlay, windowStart, windowWidth, musicPodFilter])
 
+  const [width, setWidth] = useState(document.body.clientWidth)
+  useEffect(() => {
+    const handler = () => setWidth(document.body.clientWidth)
+    window.addEventListener("resize", handler)
+
+    return () => window.removeEventListener("resize", handler)
+  })
+
   const makeSelector = (v: string, sV: (v: Field) => void) => (
     <select value={v} onChange={(e) => sV(e.currentTarget.value as Field)}>
       <option value="name">Title</option>
@@ -357,7 +345,7 @@ export function Home() {
       <label style="display: content">
         played for over
         <input
-          style="width: 30px; margin: 0 2px"
+          style="width: 45px; margin: 0 2px"
           type="number"
           value={minPlay}
           onChange={(e) => setMinPlay(e.currentTarget.value)}
@@ -515,6 +503,7 @@ export function Home() {
         primary={primary}
         breakout={breakout}
         data={filteredData}
+        width={width}
         minPlay={+minPlay / 60}
       ></App>
       <p style={"padding: 5px"}>
